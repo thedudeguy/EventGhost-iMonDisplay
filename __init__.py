@@ -30,7 +30,7 @@ eg.RegisterPlugin(
 )
 
 from eg.WinApi.Dynamic import RegisterWindowMessage
-import imon
+import imon, actions
 from imon import DSPNotifyCode, DSPNInitResult, DSPType
 
 # Registers a custom message type for the windows event system
@@ -94,13 +94,15 @@ class IMONDisplay(eg.PluginBase):
     def __init__(self):
         """Constructor. Initializes the plugin."""
         self.imonHandler = imonHandler(self)
+        #include imon so for actions
+        self.imon = imon
         # Set up actions
         vfdGroup = self.AddGroup(
             "VFD Displays",
             "Actions specifically for VFD Type Displays"
         )
-        vfdGroup.AddAction(SetVfdText)
-        vfdGroup.AddAction(SetVfdEqData)
+        vfdGroup.AddAction(actions.vfd.SetVfdText)
+        vfdGroup.AddAction(actions.vfd.SetVfdEqData)
 
     def __start__(self):
         """Called when the plugin is actived."""
@@ -153,149 +155,6 @@ class IMONDisplay(eg.PluginBase):
         self.imonHandler.handle(notifyCode, lParam)
 
         return 1
-
-class SetVfdEqData(eg.ActionBase):
-    name = "Set VFD Equalizer"
-    description = "Displays Equalizer Data on a VFD Display"
-    iconFile = "icon_display"
-
-    def __call__(self,
-                 eq1=0,
-                 eq2=0,
-                 eq3=0,
-                 eq4=0,
-                 eq5=0,
-                 eq6=0,
-                  eq7=0,
-                  eq8=0,
-                  eq9=0,
-                  eq10=0,
-                  eq11=0,
-                  eq12=0,
-                  eq13=0,
-                  eq14=0,
-                  eq15=0,
-                  eq16=0):
-        eqdata = {
-            1:eq1,
-            2:eq2,
-            3:eq3,
-            4:eq4,
-            5:eq5,
-            6:eq6,
-            7:eq7,
-            8:eq8,
-            9:eq9,
-            10:eq10,
-            11:eq11,
-            12:eq12,
-            13:eq13,
-            14:eq14,
-            15:eq15,
-            16:eq16
-        }
-        try:
-            if imon.isInited() and imon.isPluginModeEnabled():
-                result = imon.setVfdEqData(eqdata)
-                self.plugin.TriggerEvent("vfd.setVfdEqData")
-            else:
-                raise Exception, "Not Connected"
-        except Exception, msg:
-            self.PrintError("Unable to display eq: " + str(msg))
-
-    def Configure(self,
-                  eq1=0,
-                  eq2=0,
-                  eq3=0,
-                  eq4=0,
-                  eq5=0,
-                  eq6=0,
-                  eq7=0,
-                  eq8=0,
-                  eq9=0,
-                  eq10=0,
-                  eq11=0,
-                  eq12=0,
-                  eq13=0,
-                  eq14=0,
-                  eq15=0,
-                  eq16=0):
-
-        panel = eg.ConfigPanel()
-        eqctl1 = panel.SpinIntCtrl(eq1, min=0, max=100)
-        eqctl2 = panel.SpinIntCtrl(eq2, min=0, max=100)
-        eqctl3 = panel.SpinIntCtrl(eq3, min=0, max=100)
-        eqctl4 = panel.SpinIntCtrl(eq4, min=0, max=100)
-        eqctl5 = panel.SpinIntCtrl(eq5, min=0, max=100)
-        eqctl6 = panel.SpinIntCtrl(eq6, min=0, max=100)
-        eqctl7 = panel.SpinIntCtrl(eq7, min=0, max=100)
-        eqctl8 = panel.SpinIntCtrl(eq8, min=0, max=100)
-        eqctl9 = panel.SpinIntCtrl(eq9, min=0, max=100)
-        eqctl10 = panel.SpinIntCtrl(eq10, min=0, max=100)
-        eqctl11 = panel.SpinIntCtrl(eq11, min=0, max=100)
-        eqctl12 = panel.SpinIntCtrl(eq12, min=0, max=100)
-        eqctl13 = panel.SpinIntCtrl(eq13, min=0, max=100)
-        eqctl14 = panel.SpinIntCtrl(eq14, min=0, max=100)
-        eqctl15 = panel.SpinIntCtrl(eq15, min=0, max=100)
-        eqctl16 = panel.SpinIntCtrl(eq16, min=0, max=100)
-
-        bandsBox = panel.BoxedGroup(
-            "Bands (1-16)",
-            ("Band 1", eqctl1),
-            ("Band 2", eqctl2),
-            ("Band 3", eqctl3),
-            ("Band 4", eqctl4),
-            ("Band 5", eqctl5),
-            ("Band 6", eqctl6),
-            ("Band 7", eqctl7),
-            ("Band 8", eqctl8),
-            ("Band 9", eqctl9),
-            ("Band 10", eqctl10),
-            ("Band 11", eqctl11),
-            ("Band 12", eqctl12),
-            ("Band 13", eqctl13),
-            ("Band 14", eqctl14),
-            ("Band 15", eqctl15),
-            ("Band 16", eqctl16)
-        )
-        eg.EqualizeWidths(bandsBox.GetColumnItems(0))
-        panel.sizer.Add(bandsBox, 0, wx.EXPAND)
-
-        while panel.Affirmed():
-            panel.SetResult(
-                eqctl1.GetValue(),
-                eqctl2.GetValue(),
-                eqctl3.GetValue(),
-                eqctl4.GetValue(),
-                eqctl5.GetValue(),
-                eqctl6.GetValue(),
-                eqctl7.GetValue(),
-                eqctl8.GetValue(),
-                eqctl9.GetValue(),
-                eqctl10.GetValue(),
-                eqctl11.GetValue(),
-                eqctl12.GetValue(),
-                eqctl13.GetValue(),
-                eqctl14.GetValue(),
-                eqctl15.GetValue(),
-                eqctl16.GetValue()
-            )
-
-
-class SetVfdText(eg.ActionBase):
-    name = "Set VFD Text"
-    description = "Displays Text on a VFD Display"
-    iconFile = "icon_display"
-
-    def __call__(self, line1="", line2=""):
-        try:
-            if imon.isInited() and imon.isPluginModeEnabled():
-                result = imon.setVfdText(line1, line2)
-                self.plugin.TriggerEvent("vfd.setVfdText")
-            else:
-                raise Exception, "Not Connected"
-        except Exception, msg:
-            self.PrintError("Unable to display text: " + str(msg))
 
     def Configure(self, line1="", line2=""):
 
