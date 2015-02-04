@@ -170,11 +170,19 @@ class SetVfdText(eg.ActionBase):
             self.PrintError("Unable to display text: " + str(msg))
 
     def Configure(self, line1="", line2=""):
+
         panel = eg.ConfigPanel()
-        line1Control = wx.TextCtrl(panel, -1, line1)
-        line2Control = wx.TextCtrl(panel, -1, line2)
-        panel.sizer.Add(line1Control, 1, wx.EXPAND)
-        panel.sizer.Add(line2Control, 1, wx.EXPAND)
+        line1Control = panel.TextCtrl(line1)
+        line2Control = panel.TextCtrl(line2)
+
+        displayBox = panel.BoxedGroup(
+            "Display Text",
+            ("Line 1", line1Control),
+            ("Line 2", line2Control),
+        )
+        eg.EqualizeWidths(displayBox.GetColumnItems(0))
+        panel.sizer.Add(displayBox, 0, wx.EXPAND)
+
         while panel.Affirmed():
             panel.SetResult(
                 line1Control.GetValue(),
