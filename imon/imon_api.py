@@ -4,10 +4,13 @@ integrate with LCD / VFD devices
 
 """
 
-from ctypes import CDLL, c_int, CFUNCTYPE, POINTER, byref
-from ctypes.wintypes import HWND, UINT, LPCSTR, BOOL, BYTE
+from ctypes import CDLL, c_int, CFUNCTYPE, POINTER, byref, c_wchar_p
+from ctypes.wintypes import HWND, UINT, BOOL, BYTE
 from os.path import dirname, join, abspath
 from imon_message import DSPResult, DSPEQDATA, bandInfoToCType
+
+# Type required for setting text
+LPCTSTR = c_wchar_p
 
 # Load the imon display DLL into memory.
 imonDll = CDLL(abspath(join(dirname(__file__), "iMONDisplay.dll")))
@@ -25,13 +28,13 @@ imonDll.IMON_Display_IsInited.restype  = DSPResult
 imonDll.IMON_Display_IsPluginModeEnabled.argtypes = []
 imonDll.IMON_Display_IsPluginModeEnabled.restype  = DSPResult
 
-imonDll.IMON_Display_SetVfdText.argtypes = [LPCSTR, LPCSTR]
+imonDll.IMON_Display_SetVfdText.argtypes = [LPCTSTR, LPCTSTR]
 imonDll.IMON_Display_SetVfdText.restype = DSPResult
 
 imonDll.IMON_Display_SetVfdEqData.argtypes = [POINTER(DSPEQDATA)]
 imonDll.IMON_Display_SetVfdEqData.restype = DSPResult
 
-imonDll.IMON_Display_SetLcdText.argtypes = [LPCSTR]
+imonDll.IMON_Display_SetLcdText.argtypes = [LPCTSTR]
 imonDll.IMON_Display_SetLcdText.restype = DSPResult
 
 imonDll.IMON_Display_SetLcdAllIcons.argtypes = [BOOL]
@@ -177,11 +180,9 @@ def setVfdText(line1, line2):
     Notes
     -----
         It doesn't support multi-byte character and if string data is longer than 16 characters, it displays 16 characters from the first.
-        The iMON API asks for LPCTSTR types passed, but that isn't available in ctypes so I'm using LPCSTR instead. Don't know
-        if that will cause issues.
 
     """
-    result = imonDll.IMON_Display_SetVfdText(LPCSTR(line1), LPCSTR(line2))
+    result = imonDll.IMON_Display_SetVfdText(LPCTSTR(line1), LPCTSTR(line2))
     if (result == DSPResult.DSP_SUCCEEDED):
         return result
     raise Exception, result.name
@@ -243,11 +244,9 @@ def setLcdText(line):
     -----
         It supports multi-byte character and if string data is longer than display area, it will start to scroll.
         When text scrolling is finished, API will notify it with DSPNotifyCode enumeration value, DSPNM_LCD_TEXT_SCROLL_DONE.
-        The iMON API asks for LPCTSTR types passed, but that isn't available in ctypes so I'm using LPCSTR instead. Don't know
-        if that will cause issues.
 
     """
-    result = imonDll.IMON_Display_SetLcdText(LPCSTR(line))
+    result = imonDll.IMON_Display_SetLcdText(LPCTSTR(line))
     if (result == DSPResult.DSP_SUCCEEDED):
         return result
     raise Exception, result.name
