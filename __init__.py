@@ -103,6 +103,7 @@ class IMONDisplay(eg.PluginBase):
         )
         vfdGroup.AddAction(actions.vfd.SetVfdText)
         vfdGroup.AddAction(actions.vfd.SetVfdEqData)
+        vfdGroup.AddAction(actions.vfd.ShowTime)
 
     def __start__(self):
         """Called when the plugin is actived."""
