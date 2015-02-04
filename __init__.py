@@ -162,7 +162,8 @@ class SetVfdText(eg.ActionBase):
     def __call__(self, line1="", line2=""):
         try:
             if imon.isInited() and imon.isPluginModeEnabled():
-                imon.setVfdText(line1, line2)
+                result = imon.setVfdText(line1, line2)
+                self.plugin.TriggerEvent("vfd.setVfdText")
             else:
                 raise Exception, "Not Connected"
         except Exception, msg:
